@@ -72,6 +72,3 @@ def get_batches(X, y, batch_size = 100):
 		yield X[b:b+batch_size], y[b:b+batch_size]
 	
 
-
-
-
