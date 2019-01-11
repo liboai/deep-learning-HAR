@@ -2,10 +2,12 @@
 # coding: utf-8
 # Imports
 import numpy as np
-import os
 from utils.utilities import *
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
+import os
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"       # 使用第二块GPU（从0开始）
 
 # ## Prepare data
 
@@ -104,7 +106,13 @@ train_loss = []
 with graph.as_default():
     saver = tf.train.Saver()
 
-with tf.Session(graph=graph) as sess:
+sess_config = tf.ConfigProto(
+    inter_op_parallelism_threads=1,
+    intra_op_parallelism_threads=12,
+    gpu_options = tf.GPUOptions(allow_growth=True), 
+    allow_soft_placement = True, 
+    log_device_placement = False)
+with tf.Session(config = sess_config,graph=graph) as sess:
     sess.run(tf.global_variables_initializer())
     iteration = 1
    
