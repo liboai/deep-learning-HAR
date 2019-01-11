@@ -100,9 +100,6 @@ with graph.as_default():
     accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32), name='accuracy')
 
 # ### Train the network
-if (os.path.exists('checkpoints-crnn') == False):
-    get_ipython().system('mkdir checkpoints-crnn')
-
 validation_acc = []
 validation_loss = []
 
