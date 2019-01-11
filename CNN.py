@@ -8,8 +8,8 @@ import matplotlib.pyplot as plt
 import os
 import tensorflow as tf
 
-#os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-#os.environ["CUDA_VISIBLE_DEVICES"] = "1"       # 使用第二块GPU（从0开始）
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"       # 使用第二块GPU（从0开始）
 
 # ## Prepare data
 
@@ -113,61 +113,61 @@ sess_config = tf.ConfigProto(
     log_device_placement = False)
 
 NUM_GPU = 2
-for i in range(NUM_GPU):
-    with tf.device('/gpu:%d' % i):  
-        with tf.Session(config = sess_config,graph=graph) as sess:
-            sess.run(tf.global_variables_initializer())
-            iteration = 1
-           
-            # Loop over epochs
-            for e in range(epochs):
+#for i in range(NUM_GPU):
+#    with tf.device('/gpu:%d' % i):  
+with tf.Session(config = sess_config,graph=graph) as sess:
+    sess.run(tf.global_variables_initializer())
+    iteration = 1
+   
+    # Loop over epochs
+    for e in range(epochs):
+        
+        # Loop over batches
+        for x,y in get_batches(X_tr, y_tr, batch_size):
+            
+            # Feed dictionary
+            feed = {inputs_ : x, labels_ : y, keep_prob_ : 0.5, learning_rate_ : learning_rate}
+            
+            # Loss
+            loss, _ , acc = sess.run([cost, optimizer, accuracy], feed_dict = feed)
+            train_acc.append(acc)
+            train_loss.append(loss)
+            
+            # Print at each 5 iters
+            if (iteration % 5 == 0):
+                print("Epoch: {}/{}".format(e, epochs),
+                      "Iteration: {:d}".format(iteration),
+                      "Train loss: {:6f}".format(loss),
+                      "Train acc: {:.6f}".format(acc))
+            
+            # Compute validation loss at every 10 iterations
+            if (iteration%10 == 0):                
+                val_acc_ = []
+                val_loss_ = []
                 
-                # Loop over batches
-                for x,y in get_batches(X_tr, y_tr, batch_size):
-                    
-                    # Feed dictionary
-                    feed = {inputs_ : x, labels_ : y, keep_prob_ : 0.5, learning_rate_ : learning_rate}
+                for x_v, y_v in get_batches(X_vld, y_vld, batch_size):
+                    # Feed
+                    feed = {inputs_ : x_v, labels_ : y_v, keep_prob_ : 1.0}  
                     
                     # Loss
-                    loss, _ , acc = sess.run([cost, optimizer, accuracy], feed_dict = feed)
-                    train_acc.append(acc)
-                    train_loss.append(loss)
-                    
-                    # Print at each 5 iters
-                    if (iteration % 5 == 0):
-                        print("Epoch: {}/{}".format(e, epochs),
-                              "Iteration: {:d}".format(iteration),
-                              "Train loss: {:6f}".format(loss),
-                              "Train acc: {:.6f}".format(acc))
-                    
-                    # Compute validation loss at every 10 iterations
-                    if (iteration%10 == 0):                
-                        val_acc_ = []
-                        val_loss_ = []
-                        
-                        for x_v, y_v in get_batches(X_vld, y_vld, batch_size):
-                            # Feed
-                            feed = {inputs_ : x_v, labels_ : y_v, keep_prob_ : 1.0}  
-                            
-                            # Loss
-                            loss_v, acc_v = sess.run([cost, accuracy], feed_dict = feed)                    
-                            val_acc_.append(acc_v)
-                            val_loss_.append(loss_v)
-                        
-                        # Print info
-                        print("Epoch: {}/{}".format(e, epochs),
-                              "Iteration: {:d}".format(iteration),
-                              "Validation loss: {:6f}".format(np.mean(val_loss_)),
-                              "Validation acc: {:.6f}".format(np.mean(val_acc_)))
-                        
-                        # Store
-                        validation_acc.append(np.mean(val_acc_))
-                        validation_loss.append(np.mean(val_loss_))
-                    
-                    # Iterate 
-                    iteration += 1
+                    loss_v, acc_v = sess.run([cost, accuracy], feed_dict = feed)                    
+                    val_acc_.append(acc_v)
+                    val_loss_.append(loss_v)
+                
+                # Print info
+                print("Epoch: {}/{}".format(e, epochs),
+                      "Iteration: {:d}".format(iteration),
+                      "Validation loss: {:6f}".format(np.mean(val_loss_)),
+                      "Validation acc: {:.6f}".format(np.mean(val_acc_)))
+                
+                # Store
+                validation_acc.append(np.mean(val_acc_))
+                validation_loss.append(np.mean(val_loss_))
             
-            saver.save(sess,"checkpoints-cnn/har.ckpt")
+            # Iterate 
+            iteration += 1
+    
+    saver.save(sess,"checkpoints-cnn/har.ckpt")
 
 # Plot training and test loss
 t = np.arange(iteration-1)
