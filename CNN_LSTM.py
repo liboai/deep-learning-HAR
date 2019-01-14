@@ -7,6 +7,8 @@ from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 import tensorflow as tf
 # ## Prepare data
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"       # 使用第二块GPU（从0开始）
 
 X_train, labels_train, list_ch_train = read_data(data_path="./data/", split="train") # train
 X_test, labels_test, list_ch_test = read_data(data_path="./data/", split="test") # test
@@ -56,6 +58,7 @@ with graph.as_default():
     # (batch, 128, 9) --> (batch, 128, 18)
     conv1 = tf.layers.conv1d(inputs=inputs_, filters=18, kernel_size=2, strides=1, 
                              padding='same', activation = tf.nn.relu)
+    print('conv1:',conv1)
     n_ch = n_channels *2
 
 # Now, pass to LSTM cells
@@ -71,11 +74,10 @@ with graph.as_default():
     lstm_in = tf.split(lstm_in, seq_len, 0)
     
     # Add LSTM layers
-    lstm = tf.contrib.rnn.BasicLSTMCell(lstm_size)
-    drop = tf.contrib.rnn.DropoutWrapper(lstm, output_keep_prob=keep_prob_)
+    lstm = tf.nn.rnn_cell.LSTMCell(lstm_size)
+    drop = tf.nn.rnn_cell.DropoutWrapper(lstm, output_keep_prob=keep_prob_)
     cell = tf.contrib.rnn.MultiRNNCell([drop] * lstm_layers)
     initial_state = cell.zero_state(batch_size, tf.float32)
-
 
 # Define forward pass and cost function:
 with graph.as_default():

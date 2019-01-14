@@ -25,6 +25,7 @@ X_train, X_test = standardize(X_train, X_test)
 
 X_tr, X_vld, lab_tr, lab_vld = train_test_split(X_train, labels_train, 
                                                 stratify = labels_train, random_state = 123)
+print('shape(X_tr):',np.shape(X_tr))
 
 # One-hot encoding:
 y_tr = one_hot(lab_tr)
@@ -113,7 +114,7 @@ sess_config = tf.ConfigProto(
     log_device_placement = False)
 
 NUM_GPU = 2
-#for i in range(NUM_GPU):
+#for i in range(1,NUM_GPU):
 #    with tf.device('/gpu:%d' % i):  
 with tf.Session(config = sess_config,graph=graph) as sess:
     sess.run(tf.global_variables_initializer())
