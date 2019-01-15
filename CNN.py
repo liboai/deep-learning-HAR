@@ -12,7 +12,6 @@ os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"       # 使用第二块GPU（从0开始）
 
 # ## Prepare data
-
 X_train, labels_train, list_ch_train = read_data(data_path="./data/", split="train") # train
 X_test, labels_test, list_ch_test = read_data(data_path="./data/", split="test") # test
 
@@ -22,16 +21,17 @@ assert list_ch_train == list_ch_test, "Mistmatch in channels!"
 X_train, X_test = standardize(X_train, X_test)
 
 # Train/Validation Split
-
+#sklearn的库函数,从训练集中随机选择测试集，按stratify指定的比例分配
 X_tr, X_vld, lab_tr, lab_vld = train_test_split(X_train, labels_train, 
                                                 stratify = labels_train, random_state = 123)
 print('shape(X_tr):',np.shape(X_tr))
+print('lab_tr:',lab_tr)
 
 # One-hot encoding:
 y_tr = one_hot(lab_tr)
+print('y_tr:',y_tr)
 y_vld = one_hot(lab_vld)
 y_test = one_hot(labels_test)
-
 
 # ### Hyperparameters
 batch_size = 600       # Batch size
@@ -160,7 +160,6 @@ with tf.Session(config = sess_config,graph=graph) as sess:
                       "Iteration: {:d}".format(iteration),
                       "Validation loss: {:6f}".format(np.mean(val_loss_)),
                       "Validation acc: {:.6f}".format(np.mean(val_acc_)))
-                
                 # Store
                 validation_acc.append(np.mean(val_acc_))
                 validation_loss.append(np.mean(val_loss_))
@@ -189,7 +188,6 @@ plt.ylabel("Accuray")
 plt.legend(['train', 'validation'], loc='upper right')
 plt.show()
 
-
 # ## Evaluate on test set
 
 test_acc = []
@@ -206,4 +204,3 @@ with tf.Session(graph=graph) as sess:
         batch_acc = sess.run(accuracy, feed_dict=feed)
         test_acc.append(batch_acc)
     print("Test accuracy: {:.6f}".format(np.mean(test_acc)))
-

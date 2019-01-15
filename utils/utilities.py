@@ -20,6 +20,7 @@ def read_data(data_path, split = "train"):
     # Read labels and one-hot encode
     label_path = os.path.join(path_, "y_" + split + ".txt")
     labels = pd.read_csv(label_path, header = None)
+    print('labels:',labels)
     
     # Read time-series data
     channel_files = os.listdir(path_signals)
@@ -45,6 +46,7 @@ def read_data(data_path, split = "train"):
     
     # Return 
     print('X:',np.shape(X))
+    print('labels[0].values:',labels[0].values)
     return X, labels[0].values, list_of_channels
 
 def standardize(train, test):
@@ -73,4 +75,3 @@ def get_batches(X, y, batch_size = 100):
 	for b in range(0, len(X), batch_size):
 		yield X[b:b+batch_size], y[b:b+batch_size]
 	
-
